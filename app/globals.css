@@ -1,3 +1,14 @@
+/* Lighter, leaner vertical stripes for home page */
+.bg-vertical-stripes-lighter {
+  background-color: #ffffff;
+  background-image: repeating-linear-gradient(
+    to right,
+    #176e43 0px,
+    #176e43 30px,
+    #ffffff 30px,
+    #ffffff 60px
+  );
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
