@@ -1,0 +1,118 @@
+<% layout('../layout') -%>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold gradient-text">My Appointments</h1>
+        <a href="/appointments/book" class="gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+            <i class="fas fa-plus mr-2"></i>Book New Appointment
+        </a>
+    </div>
+    
+    <% if (success) { %>
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+            <i class="fas fa-check-circle mr-2"></i>
+            Your appointment has been booked successfully! You will receive a confirmation email shortly.
+        </div>
+    <% } %>
+    
+    <% if (appointments.length === 0) { %>
+        <div class="text-center py-12">
+            <div class="w-24 h-24 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-calendar-alt text-white text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">No Appointments Yet</h3>
+            <p class="text-gray-600 mb-6">You haven't booked any appointments yet. Start your style transformation today!</p>
+            <a href="/appointments/book" class="gradient-bg text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                Book Your First Appointment
+            </a>
+        </div>
+    <% } else { %>
+        <div class="grid gap-6">
+            <% appointments.forEach(appointment => { %>
+                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 <%= appointment.status === 'confirmed' ? 'border-green-500' : appointment.status === 'cancelled' ? 'border-red-500' : 'border-yellow-500' %>">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800"><%= appointment.serviceName %></h3>
+                            <p class="text-gray-600">Booking ID: <%= appointment.bookingId %></p>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold 
+                                <%= appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
+                                    appointment.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
+                                    'bg-yellow-100 text-yellow-800' %>">
+                                <%= appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) %>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Date & Time</p>
+                            <p class="font-semibold">
+                                <%= new Date(appointment.date).toLocaleDateString('en-IN', { 
+                                    weekday: 'long', 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                }) %>
+                            </p>
+                            <p class="text-gray-600">
+                                <%= new Date(appointment.date).toLocaleTimeString('en-IN', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                }) %>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Duration & Amount</p>
+                            <p class="font-semibold"><%= appointment.duration %> minutes</p>
+                            <p class="text-rose-600 font-semibold">₹<%= appointment.amount %></p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            <p>Payment: <%= appointment.paymentMethod %> • <%= appointment.paymentStatus %></p>
+                            <p>Booked on: <%= new Date(appointment.createdAt).toLocaleDateString('en-IN') %></p>
+                        </div>
+                        
+                        <% if (appointment.status === 'confirmed' && new Date(appointment.date) > new Date()) { %>
+                            <button onclick="cancelAppointment('<%= appointment.id %>')" 
+                                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                                <i class="fas fa-times mr-2"></i>Cancel
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
+
+<script>
+async function cancelAppointment(appointmentId) {
+    if (!confirm('Are you sure you want to cancel this appointment?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/appointments/cancel/${appointmentId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Failed to cancel appointment. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+}
+</script>

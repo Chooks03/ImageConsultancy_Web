@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap');
+
+/* ✅ Custom font face */
+@font-face {
+  font-family: 'Mrs Eaves';
+  src: url('/fonts/MrsEaves.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ✅ Custom utilities */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ✅ Base styles */
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #1a1a1a;
+    --border: #135c37;
+  }
+  .dark {
+    --background: #1a1a1a;
+    --foreground: #f1f1f1;
+    --border: #4caf50;
+  }
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)];
+    font-family: 'Libre Baskerville', 'Mrs Eaves', serif;
+  }
+}
+
+/* ✅ Vertical striped background */
+.bg-vertical-stripes {
+  background-color: #ffffff;
+  background-image: repeating-linear-gradient(
+    to right,
+    #135c37 0px,
+    #135c37 60px,
+    #ffffff 60px,
+    #ffffff 120px
+  );
+}

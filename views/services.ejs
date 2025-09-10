@@ -1,0 +1,176 @@
+<% layout('layout') -%>
+
+<!-- Hero Section -->
+<section class="py-20 bg-gradient-to-br from-rose-50 to-purple-50">
+    <div class="container mx-auto px-4 text-center">
+        <h1 class="text-5xl font-bold mb-6">
+            Our <span class="gradient-text">Services</span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Comprehensive image consultancy services designed to help you discover your unique style, 
+            boost your confidence, and make a lasting impression in every aspect of your life.
+        </p>
+    </div>
+</section>
+
+<!-- Services Grid -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="grid md:grid-cols-2 gap-12">
+            <% services.forEach((service, index) => { %>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="h-64 bg-gradient-to-br from-rose-200 to-purple-200 flex items-center justify-center">
+                        <i class="fas fa-<%= index === 0 ? 'user-check' : index === 1 ? 'tshirt' : index === 2 ? 'palette' : 'shopping-bag' %> text-6xl text-white opacity-70"></i>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold mb-4"><%= service.name %></h3>
+                        <p class="text-gray-600 mb-6 leading-relaxed"><%= service.description %></p>
+                        
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center text-gray-500">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span><%= service.duration %> minutes</span>
+                                </div>
+                                <div class="flex items-center text-rose-600 font-semibold text-xl">
+                                    <i class="fas fa-rupee-sign mr-1"></i>
+                                    <span><%= service.price %></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6">
+                            <% if (index === 0) { %>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Personal style assessment</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Body shape analysis</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Style recommendations</span>
+                                </div>
+                            <% } else if (index === 1) { %>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Wardrobe evaluation</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Mix & match suggestions</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Shopping list creation</span>
+                                </div>
+                            <% } else if (index === 2) { %>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Seasonal color analysis</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Color palette creation</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Makeup color guidance</span>
+                                </div>
+                            <% } else { %>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Personal shopping companion</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Budget-friendly options</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>Quality assessment</span>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <a href="/appointments/book" class="w-full gradient-bg text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity text-center block">
+                            Book This Service
+                        </a>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</section>
+
+<!-- Process Section -->
+<section class="py-20 bg-gradient-to-br from-rose-50 to-purple-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4">
+                Our <span class="gradient-text">Process</span>
+            </h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                A simple, structured approach to transforming your style
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white font-bold text-xl">1</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Consultation</h3>
+                <p class="text-gray-600">Initial discussion about your style goals and preferences</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white font-bold text-xl">2</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Analysis</h3>
+                <p class="text-gray-600">Professional assessment of your body shape, coloring, and lifestyle</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white font-bold text-xl">3</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Recommendations</h3>
+                <p class="text-gray-600">Personalized style guide and wardrobe suggestions</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white font-bold text-xl">4</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Follow-up</h3>
+                <p class="text-gray-600">Ongoing support and guidance for your style journey</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl font-bold mb-6">
+                Ready to <span class="gradient-text">Transform Your Style?</span>
+            </h2>
+            <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                Choose the service that best fits your needs and start your style transformation journey today.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/appointments/book" class="gradient-bg text-white px-8 py-4 rounded-lg text-lg font-semibold hover:opacity-90 transition-opacity">
+                    <i class="fas fa-calendar-alt mr-2"></i>Book Consultation
+                </a>
+                <a href="/contact" class="bg-gray-100 text-gray-800 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-phone mr-2"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

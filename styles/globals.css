@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 120 60% 98%;
+    --foreground: 120 100% 10%;
+
+    --card: 120 50% 96%;
+    --card-foreground: 120 30% 15%;
+
+    --popover: 120 40% 96%;
+    --popover-foreground: 120 30% 15%;
+
+    --primary: 142 76% 36%; /* green */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 142 60% 90%; /* green */
+    --secondary-foreground: 142 80% 20%;
+
+    --muted: 142 40% 92%; /* green */
+    --muted-foreground: 142 20% 30%;
+
+    --accent: 142 76% 45%; /* green */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 142 30% 80%; /* green */
+    --input: 142 40% 90%; /* green */
+    --ring: 142 76% 36%; /* green */
+
+    --chart-1: 142 70% 45%;
+    --chart-2: 142 60% 40%;
+    --chart-3: 142 50% 35%;
+    --chart-4: 142 40% 30%;
+    --chart-5: 142 30% 25%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 120 50% 95%;
+    --sidebar-foreground: 120 20% 20%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 142 40% 80%;
+    --sidebar-accent-foreground: 142 20% 20%;
+    --sidebar-border: 142 30% 75%;
+    --sidebar-ring: 142 76% 36%;
+  }
+
+  .dark {
+    --background: 120 10% 10%;
+    --foreground: 120 30% 90%;
+
+    --card: 120 10% 15%;
+    --card-foreground: 120 30% 90%;
+
+    --popover: 120 10% 15%;
+    --popover-foreground: 120 30% 90%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 142 10% 25%;
+    --secondary-foreground: 142 30% 90%;
+
+    --muted: 142 10% 20%;
+    --muted-foreground: 142 20% 70%;
+
+    --accent: 142 76% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 142 20% 40%;
+    --input: 142 20% 30%;
+    --ring: 142 76% 36%;
+
+    --chart-1: 142 60% 45%;
+    --chart-2: 142 50% 40%;
+    --chart-3: 142 40% 35%;
+    --chart-4: 142 30% 30%;
+    --chart-5: 142 20% 25%;
+
+    --sidebar-background: 120 10% 10%;
+    --sidebar-foreground: 120 30% 90%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 142 10% 20%;
+    --sidebar-accent-foreground: 142 30% 90%;
+    --sidebar-border: 142 10% 20%;
+    --sidebar-ring: 142 76% 36%;
+  }
+}
+main {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100vh;
+}
+section {
+  scroll-snap-align: start;
+  min-height: 100vh;
+}

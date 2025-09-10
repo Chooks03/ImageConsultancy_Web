@@ -1,0 +1,134 @@
+<% layout('../layout') -%>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold gradient-text">Manage Appointments</h1>
+        <a href="/admin" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold">All Appointments</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Details</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% if (appointments.length === 0) { %>
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">No appointments found</td>
+                        </tr>
+                    <% } else { %>
+                        <% appointments.forEach(appointment => { %>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <%= appointment.bookingId %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900"><%= appointment.userName %></div>
+                                    <div class="text-sm text-gray-500"><%= appointment.userEmail %></div>
+                                    <div class="text-sm text-gray-500"><%= appointment.userPhone %></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900"><%= appointment.serviceName %></div>
+                                    <div class="text-sm text-gray-500"><%= appointment.duration %> minutes</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        <%= new Date(appointment.date).toLocaleDateString('en-IN', { 
+                                            weekday: 'short', 
+                                            year: 'numeric', 
+                                            month: 'short', 
+                                            day: 'numeric' 
+                                        }) %>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        <%= new Date(appointment.date).toLocaleTimeString('en-IN', { 
+                                            hour: '2-digit', 
+                                            minute: '2-digit' 
+                                        }) %>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">₹<%= appointment.amount %></div>
+                                    <div class="text-sm text-gray-500"><%= appointment.paymentMethod %></div>
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                        <%= appointment.paymentStatus === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+                                        <%= appointment.paymentStatus %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                        <%= appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
+                                            appointment.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
+                                            'bg-yellow-100 text-yellow-800' %>">
+                                        <%= appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1) %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <button onclick="viewAppointment('<%= appointment.id %>')" 
+                                                class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <% if (appointment.status === 'confirmed') { %>
+                                            <button onclick="cancelAppointment('<%= appointment.id %>')" 
+                                                    class="text-red-600 hover:text-red-900">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewAppointment(appointmentId) {
+    // In a real app, this would open a modal or navigate to a detail page
+    alert('View appointment details for ID: ' + appointmentId);
+}
+
+async function cancelAppointment(appointmentId) {
+    if (!confirm('Are you sure you want to cancel this appointment?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/appointments/cancel/${appointmentId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Failed to cancel appointment. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+}
+</script>

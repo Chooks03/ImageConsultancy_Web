@@ -1,0 +1,198 @@
+<% layout('../layout') -%>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex items-center mb-8">
+            <a href="/appointments" class="text-gray-600 hover:text-gray-800 mr-4">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <h1 class="text-3xl font-bold gradient-text">Book Appointment</h1>
+        </div>
+        
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Services Selection -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Select Service</h2>
+                    <div class="grid gap-4">
+                        <% services.forEach(service => { %>
+                            <div class="service-option border rounded-lg p-4 cursor-pointer hover:border-rose-500 transition-colors" 
+                                 data-service-id="<%= service.id %>"
+                                 data-service-name="<%= service.name %>"
+                                 data-service-price="<%= service.price %>"
+                                 data-service-duration="<%= service.duration %>">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-lg"><%= service.name %></h3>
+                                        <p class="text-gray-600 mb-2"><%= service.description %></p>
+                                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                            <span><i class="fas fa-clock mr-1"></i><%= service.duration %> mins</span>
+                                            <span class="text-rose-600 font-semibold">₹<%= service.price %></span>
+                                        </div>
+                                    </div>
+                                    <div class="service-radio hidden">
+                                        <i class="fas fa-check-circle text-rose-500 text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+                
+                <!-- Date & Time Selection -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Select Date & Time</h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="appointmentDate" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" id="appointmentDate" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="appointmentTime" class="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                            <select id="appointmentTime" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                <option value="">Select time</option>
+                                <option value="09:00">9:00 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="14:00">2:00 PM</option>
+                                <option value="15:00">3:00 PM</option>
+                                <option value="16:00">4:00 PM</option>
+                                <option value="17:00">5:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Booking Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                    <h2 class="text-xl font-semibold mb-4">Booking Summary</h2>
+                    
+                    <div id="booking-summary" class="hidden">
+                        <div class="space-y-3 mb-6">
+                            <div>
+                                <p class="text-sm text-gray-600">Service</p>
+                                <p id="summary-service" class="font-semibold"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Duration</p>
+                                <p id="summary-duration" class="font-semibold"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Date</p>
+                                <p id="summary-date" class="font-semibold"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Time</p>
+                                <p id="summary-time" class="font-semibold"></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Consultant</p>
+                                <p class="font-semibold">Sriharshavardhini</p>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t pt-4 mb-6">
+                            <div class="flex justify-between items-center text-lg font-semibold">
+                                <span>Total Amount</span>
+                                <span id="summary-price" class="text-rose-600"></span>
+                            </div>
+                        </div>
+                        
+                        <button id="proceed-payment" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                            Proceed to Payment
+                        </button>
+                    </div>
+                    
+                    <div id="booking-placeholder" class="text-center text-gray-500">
+                        <i class="fas fa-calendar-alt text-3xl mb-3"></i>
+                        <p>Select a service and date to see booking summary</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedService = null;
+
+// Service selection
+document.querySelectorAll('.service-option').forEach(option => {
+    option.addEventListener('click', function() {
+        // Remove previous selection
+        document.querySelectorAll('.service-option').forEach(opt => {
+            opt.classList.remove('border-rose-500', 'bg-rose-50');
+            opt.querySelector('.service-radio').classList.add('hidden');
+        });
+        
+        // Add selection to clicked option
+        this.classList.add('border-rose-500', 'bg-rose-50');
+        this.querySelector('.service-radio').classList.remove('hidden');
+        
+        // Store selected service
+        selectedService = {
+            id: this.dataset.serviceId,
+            name: this.dataset.serviceName,
+            price: this.dataset.servicePrice,
+            duration: this.dataset.serviceDuration
+        };
+        
+        updateBookingSummary();
+    });
+});
+
+// Date and time change handlers
+document.getElementById('appointmentDate').addEventListener('change', updateBookingSummary);
+document.getElementById('appointmentTime').addEventListener('change', updateBookingSummary);
+
+function updateBookingSummary() {
+    const date = document.getElementById('appointmentDate').value;
+    const time = document.getElementById('appointmentTime').value;
+    
+    if (selectedService && date && time) {
+        document.getElementById('booking-placeholder').classList.add('hidden');
+        document.getElementById('booking-summary').classList.remove('hidden');
+        
+        document.getElementById('summary-service').textContent = selectedService.name;
+        document.getElementById('summary-duration').textContent = selectedService.duration + ' minutes';
+        document.getElementById('summary-date').textContent = new Date(date).toLocaleDateString('en-IN', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        document.getElementById('summary-time').textContent = formatTime(time);
+        document.getElementById('summary-price').textContent = '₹' + selectedService.price;
+    } else {
+        document.getElementById('booking-placeholder').classList.remove('hidden');
+        document.getElementById('booking-summary').classList.add('hidden');
+    }
+}
+
+function formatTime(time) {
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+}
+
+// Proceed to payment
+document.getElementById('proceed-payment').addEventListener('click', function() {
+    const date = document.getElementById('appointmentDate').value;
+    const time = document.getElementById('appointmentTime').value;
+    
+    if (selectedService && date && time) {
+        const appointmentDateTime = `${date}T${time}`;
+        window.location.href = `/appointments/payment?serviceId=${selectedService.id}&date=${date}&time=${time}`;
+    }
+});
+
+// Set minimum date to today
+document.getElementById('appointmentDate').min = new Date().toISOString().split('T')[0];
+</script>
