@@ -7,6 +7,13 @@
   cursor: pointer;
   transition: 0.5s ease;
   height: 50px;
+  width: 50px;
+  padding: 10px 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .menu:hover .bar {
   box-shadow: 1px 1px 7px 1px rgba(0, 0, 0, 0.3);
@@ -20,7 +27,7 @@
   transition: 0.4s ease;
 }
 .bar:not(:first-child) {
-  margin-top: 7px;
+  margin-top: 12px;
 }
 #hi {
   position: absolute;

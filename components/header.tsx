@@ -64,7 +64,7 @@ export default function Header() {
       <header className="relative z-50 w-full bg-[#C9E3D4]">
         <div className="flex flex-col items-stretch sm:flex-row sm:items-center sm:justify-between px-2 xs:px-3 sm:px-4 py-2 md:px-8 gap-2 sm:gap-0">
           {/* Logo, Hamburger, Title stacked on mobile */}
-          <div className="flex w-full sm:w-auto items-center gap-2 xs:gap-3 min-w-0">
+          <div className="flex w-full sm:w-auto items-center gap-6 min-w-0">
             <button
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               onClick={toggleMenu}
@@ -78,18 +78,19 @@ export default function Header() {
                 <MenuIcon className="w-6 h-6 text-[#28563B]" />
               )}
             </button>
-            <Link href="/" className="flex items-center gap-2 min-w-0 flex-shrink-0">
-              <img
-                src="/logo.jpg"
-                alt="Logo"
-                draggable={false}
-                className="w-10 h-10 md:w-12 md:h-12 rounded-full shadow-md shrink-0"
-              />
+            <Link href="/" className="flex items-center gap-4 min-w-0 flex-shrink-0">
+              {/* Logo removed as requested */}
               <div className="flex flex-col min-w-0">
-                <h1 className="text-[#28563B] font-sans font-extrabold whitespace-pre-wrap text-base sm:text-lg md:text-xl leading-tight tracking-widest">
-                  SRIHARSHAVARDHINI
+                <h1 className="text-[#28563B] font-serif font-extrabold whitespace-pre-wrap text-lg sm:text-2xl md:text-4xl leading-tight tracking-widest flex items-center gap-4">
+                  THE
+                  <span style={{marginLeft: '0.25em', marginRight: '0.25em'}}>IMAGE</span>
+                  <span className="inline-flex items-center justify-center">
+                    I
+                    <img src="/WhatsApp_Image_2025-08-06_at_00.12.04_9d5caab6-removebg-preview.png" alt="Logo S" className="w-8 h-8 md:w-10 md:h-10 align-middle mx-0" style={{verticalAlign: 'middle'}} />
+                    LAND
+                  </span>
                 </h1>
-                <p className="text-[#28563B] font-semibold font-sans text-xs sm:text-sm md:text-base leading-none">
+                <p className="text-[#6ca16c] font-serif text-base sm:text-lg md:text-xl leading-none mt-1">
                   IMAGE CONSULTANCY
                 </p>
               </div>
