@@ -48,7 +48,7 @@ const servicePackages = [
   { name: "Travel Wardrobe & Capsule Planning", price: "From ₹4,000", details: "Personalized travel wardrobe/capsule planning" },
 ];
 
-const OurServices: React.FC = () => {
+const Services: React.FC = () => {
   const comparisonTableRef = useRef<HTMLTableElement>(null);
   const serviceTableRef = useRef<HTMLTableElement>(null);
   const hasAnimated = useRef(false);
@@ -77,14 +77,14 @@ const OurServices: React.FC = () => {
   return (
     <div
       className="relative min-h-screen flex flex-col overflow-hidden bg-[#d4f1d4] px-2 sm:px-6 md:px-10 py-10"
-      >
+    >
       <main className="flex-1 flex flex-col justify-center">
         <div className="max-w-5xl mx-auto rounded-xl shadow-2xl p-6 sm:p-10 bg-white/90 border border-[#6c935c] backdrop-blur-md">
           <h1
             className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-10 text-center break-words"
             style={{ color: "#14532d" }}
           >
-            Our Services
+            Services
           </h1>
           <section className="mb-10">
             <h2
@@ -97,7 +97,7 @@ const OurServices: React.FC = () => {
               <table
                 ref={comparisonTableRef}
                 className="min-w-full border-collapse"
-                style={{ width: "100%" /* removed fixed for default auto */ }}
+                style={{ width: "100%" }}
               >
                 <thead>
                   <tr className="bg-[#6c935c] text-white">
@@ -148,7 +148,7 @@ const OurServices: React.FC = () => {
               <table
                 ref={serviceTableRef}
                 className="min-w-full border-collapse"
-                style={{ width: "100%" /* removed fixed for default auto */ }}
+                style={{ width: "100%" }}
               >
                 <thead>
                   <tr className="bg-[#6c935c] text-white">
@@ -196,4 +196,4 @@ const OurServices: React.FC = () => {
   );
 };
 
-export default OurServices;
+export default Services;

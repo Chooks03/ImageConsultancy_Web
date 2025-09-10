@@ -25,7 +25,8 @@ export default function Header() {
   const pathname = usePathname();
 
   const userIsAdmin = refreshedAdmin || isAdmin;
-  const instagramUrl = "https://instagram.com/sriharshavardhini";
+  const instagramUrl =
+    "https://www.instagram.com/imageconsultant_harsha?igsh=NDM0Mmhqb2t4YmR6";
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -50,26 +51,20 @@ export default function Header() {
 
   return (
     <>
-      {/* Top striped border */}
-      <div
-        className="w-full h-4"
-        style={{
-          background:
-            "repeating-linear-gradient(to right, #28563B 0px, #28563B 8px, transparent 8px, transparent 28px)",
-        }}
-      />
-
       {showModal && <LoginModal onClose={() => setShowModal(false)} />}
 
-      <header className="relative z-50 w-full bg-[#C9E3D4]">
-        <div className="flex flex-col items-stretch sm:flex-row sm:items-center sm:justify-between px-2 xs:px-3 sm:px-4 py-2 md:px-8 gap-2 sm:gap-0">
-          {/* Logo, Hamburger, Title stacked on mobile */}
-          <div className="flex w-full sm:w-auto items-center gap-6 min-w-0">
+      <header
+        className="relative z-50 w-full"
+        style={{ background: "#b7cbbd" }}
+      >
+        <div className="flex flex-col sm:flex-row items-center sm:items-center sm:justify-between px-4 xs:px-6 sm:px-8 py-3 gap-2 sm:gap-0">
+          {/* Left section: hamburger + logo */}
+          <div className="flex w-full sm:w-auto items-center gap-4 min-w-0">
             <button
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               onClick={toggleMenu}
               title={isMenuOpen ? "Close menu" : "Open menu"}
-              className="p-2 rounded bg-[#C9E3D4] text-[#28563B] hover:bg-[#28563B] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#28563B] transition flex-shrink-0"
+              className="p-3 rounded bg-[#b7cbbd] text-[#28563B] hover:bg-white focus:bg-white hover:text-[#28563B] focus:outline-none focus:ring-2 focus:ring-[#28563B] transition flex-shrink-0"
               style={{ minWidth: 40, minHeight: 40 }}
             >
               {isMenuOpen ? (
@@ -78,19 +73,29 @@ export default function Header() {
                 <MenuIcon className="w-6 h-6 text-[#28563B]" />
               )}
             </button>
-            <Link href="/" className="flex items-center gap-4 min-w-0 flex-shrink-0">
-              {/* Logo removed as requested */}
+            <Link
+              href="/"
+              className="flex items-center gap-3 min-w-0 flex-shrink-0"
+              aria-label="Homepage"
+            >
               <div className="flex flex-col min-w-0">
-                <h1 className="text-[#28563B] font-serif font-extrabold whitespace-pre-wrap text-lg sm:text-2xl md:text-4xl leading-tight tracking-widest flex items-center gap-4">
+                <h1 className="text-[#28563B] font-serif font-extrabold whitespace-pre-wrap text-base sm:text-xl md:text-3xl leading-tight tracking-widest flex items-center gap-3">
                   THE
-                  <span style={{marginLeft: '0.25em', marginRight: '0.25em'}}>IMAGE</span>
+                  <span style={{ marginLeft: "0.25em", marginRight: "0.25em" }}>
+                    IMAGE
+                  </span>
                   <span className="inline-flex items-center justify-center">
                     I
-                    <img src="/WhatsApp_Image_2025-08-06_at_00.12.04_9d5caab6-removebg-preview.png" alt="Logo S" className="w-8 h-8 md:w-10 md:h-10 align-middle mx-0" style={{verticalAlign: 'middle'}} />
+                    <img
+                      src="/WhatsApp_Image_2025-08-06_at_00.12.04_9d5caab6-removebg-preview.png"
+                      alt="Logo S"
+                      className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 align-middle mx-0"
+                      style={{ verticalAlign: "middle" }}
+                    />
                     LAND
                   </span>
                 </h1>
-                <p className="text-[#6ca16c] font-serif text-base sm:text-lg md:text-xl leading-none mt-1">
+                <p className="text-[#6ca16c] font-serif text-xs sm:text-sm md:text-base leading-none mt-0.5 truncate max-w-xs">
                   IMAGE CONSULTANCY
                 </p>
               </div>
@@ -98,12 +103,13 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-3 md:space-x-4 lg:space-x-6">
+          <nav className="hidden md:flex items-center space-x-4 lg:space-x-6 pr-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => window.open(instagramUrl, "_blank")}
-              className="text-[#28563B] hover:text-[#28563B] hover:bg-[#C9E3D4]"
+              className="text-[#28563B] hover:text-[#28563B] hover:bg-[#b7cbbd]"
+              aria-label="Instagram"
             >
               <Instagram className="w-5 h-5 md:w-6" />
             </Button>
@@ -112,14 +118,14 @@ export default function Header() {
                 <Button
                   variant="outline"
                   onClick={() => router.push("/login")}
-                  className="border-[#28563B] text-[#28563B] hover:bg-[#C9E3D4] bg-transparent px-3 font-sans font-semibold"
+                  className="border-[#28563B] text-[#28563B] hover:bg-[#b7cbbd] bg-transparent px-4 font-sans font-semibold"
                 >
                   Login
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => router.push("/signup")}
-                  className="border-[#28563B] text-[#28563B] hover:bg-[#C9E3D4] bg-transparent px-3 font-sans font-semibold"
+                  className="border-[#28563B] text-[#28563B] hover:bg-[#b7cbbd] bg-transparent px-4 font-sans font-semibold"
                 >
                   Sign Up
                 </Button>
@@ -131,7 +137,8 @@ export default function Header() {
                   variant="ghost"
                   size="icon"
                   onClick={() => router.push("/cart")}
-                  className="text-[#28563B] hover:text-[#28563B] hover:bg-[#C9E3D4]"
+                  className="text-[#28563B] hover:text-[#28563B] hover:bg-[#b7cbbd]"
+                  aria-label="Shopping Cart"
                 >
                   <ShoppingCart className="w-6 h-6" />
                 </Button>
@@ -139,14 +146,15 @@ export default function Header() {
                   variant="ghost"
                   size="icon"
                   onClick={() => router.push("/user-info")}
-                  className="text-[#28563B] hover:text-[#28563B] hover:bg-[#C9E3D4]"
+                  className="text-[#28563B] hover:text-[#28563B] hover:bg-[#b7cbbd]"
+                  aria-label="User Profile"
                 >
                   <User className="w-6 h-6" />
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleLogout}
-                  className="border-[#28563B] text-[#28563B] hover:bg-[#C9E3D4] bg-transparent px-3 font-sans font-semibold"
+                  className="border-[#28563B] text-[#28563B] hover:bg-[#b7cbbd] bg-transparent px-4 font-sans font-semibold"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
@@ -157,7 +165,7 @@ export default function Header() {
               <Button
                 variant="outline"
                 onClick={() => router.push("/admin/dashboard")}
-                className="border-[#28563B] text-[#28563B] hover:bg-[#C9E3D4] bg-transparent px-3 font-sans font-semibold"
+                className="border-[#28563B] text-[#28563B] hover:bg-[#b7cbbd] bg-transparent px-4 font-sans font-semibold"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Admin
@@ -166,13 +174,13 @@ export default function Header() {
           </nav>
 
           {/* Mobile Navigation */}
-          <div className="md:hidden flex w-full justify-end gap-2 flex-shrink-0">
+          <div className="md:hidden flex w-full justify-end gap-3 flex-shrink-0 pr-2">
             {!user && (
               <>
                 <Button
                   variant="outline"
                   onClick={() => router.push("/login")}
-                  className="border-[#28563B] text-[#28563B] hover:bg-[#C9E3D4] bg-transparent text-sm px-3 py-1 font-sans font-semibold"
+                  className="border-[#28563B] text-[#28563B] hover:bg-[#b7cbbd] bg-transparent text-sm px-3 py-1 font-sans font-semibold"
                   style={{ minWidth: 80 }}
                 >
                   Login
@@ -180,7 +188,7 @@ export default function Header() {
                 <Button
                   variant="outline"
                   onClick={() => router.push("/signup")}
-                  className="border-[#28563B] text-[#28563B] hover:bg-[#C9E3D4] bg-transparent text-sm px-3 py-1 font-sans font-semibold"
+                  className="border-[#28563B] text-[#28563B] hover:bg-[#b7cbbd] bg-transparent text-sm px-3 py-1 font-sans font-semibold"
                   style={{ minWidth: 80 }}
                 >
                   Sign Up
@@ -192,7 +200,7 @@ export default function Header() {
                 variant="ghost"
                 size="icon"
                 onClick={() => router.push("/user-info")}
-                className="text-[#28563B] hover:text-[#28563B] hover:bg-[#C9E3D4]"
+                className="text-[#28563B] hover:text-[#28563B] hover:bg-[#b7cbbd]"
                 aria-label="User Profile"
               >
                 <User className="w-6 h-6" />
@@ -211,7 +219,7 @@ export default function Header() {
             aria-hidden="true"
           />
           <div
-            className="fixed top-0 left-0 z-50 w-64 sm:w-72 max-h-screen p-6 bg-[#C9E3D4] flex flex-col space-y-6 rounded-tr-lg rounded-br-lg shadow-lg overflow-auto"
+            className="fixed top-0 left-0 z-50 w-64 sm:w-72 max-h-screen p-6 bg-[#b7cbbd] flex flex-col space-y-6 rounded-tr-lg rounded-br-lg shadow-lg overflow-auto"
             role="menu"
             aria-label="Mobile navigation menu"
             onClick={(e) => e.stopPropagation()}
@@ -230,7 +238,7 @@ export default function Header() {
                 className={`py-3 px-4 rounded ${
                   isActive("/")
                     ? "bg-[#28563B] text-white"
-                    : "bg-[#C9E3D4] hover:bg-[#28563B] hover:text-white"
+                    : "bg-[#b7cbbd] hover:bg-[#28563B] hover:text-white"
                 }`}
               >
                 HOME
@@ -241,18 +249,18 @@ export default function Header() {
                 className={`py-3 px-4 rounded ${
                   isActive("/combined-page#about")
                     ? "bg-[#28563B] text-white"
-                    : "bg-[#C9E3D4] hover:bg-[#28563B] hover:text-white"
+                    : "bg-[#b7cbbd] hover:bg-[#28563B] hover:text-white"
                 }`}
               >
                 ABOUT
               </Link>
               <Link
-                href="/combined-page#services"
+                href="/services"
                 onClick={closeMenu}
                 className={`py-3 px-4 rounded ${
-                  isActive("/combined-page#services")
+                  isActive("/services")
                     ? "bg-[#28563B] text-white"
-                    : "bg-[#C9E3D4] hover:bg-[#28563B] hover:text-white"
+                    : "bg-[#b7cbbd] hover:bg-[#28563B] hover:text-white"
                 }`}
               >
                 SERVICES
@@ -263,7 +271,7 @@ export default function Header() {
                 className={`py-3 px-4 rounded ${
                   isActive("/appointments")
                     ? "bg-[#28563B] text-white"
-                    : "bg-[#C9E3D4] hover:bg-[#28563B] hover:text-white"
+                    : "bg-[#b7cbbd] hover:bg-[#28563B] hover:text-white"
                 }`}
               >
                 APPOINTMENTS
@@ -274,7 +282,7 @@ export default function Header() {
                 className={`py-3 px-4 rounded ${
                   isActive("/combined-page#faq")
                     ? "bg-[#28563B] text-white"
-                    : "bg-[#C9E3D4] hover:bg-[#28563B] hover:text-white"
+                    : "bg-[#b7cbbd] hover:bg-[#28563B] hover:text-white"
                 }`}
               >
                 FAQ
@@ -285,7 +293,7 @@ export default function Header() {
                 className={`py-3 px-4 rounded ${
                   isActive("/combined-page#instagram")
                     ? "bg-[#28563B] text-white"
-                    : "bg-[#C9E3D4] hover:bg-[#28563B] hover:text-white"
+                    : "bg-[#b7cbbd] hover:bg-[#28563B] hover:text-white"
                 }`}
               >
                 INSTAGRAM
@@ -296,7 +304,7 @@ export default function Header() {
                 className={`py-3 px-4 rounded ${
                   isActive("/combined-page#contact")
                     ? "bg-[#28563B] text-white"
-                    : "bg-[#C9E3D4] hover:bg-[#28563B] hover:text-white"
+                    : "bg-[#b7cbbd] hover:bg-[#28563B] hover:text-white"
                 }`}
               >
                 CONTACT
@@ -309,7 +317,7 @@ export default function Header() {
                       closeMenu();
                       router.push("/login");
                     }}
-                    className="border-[#28563B] text-[#28563B] hover:bg-[#C9E3D4] bg-transparent font-menu-serif font-semibold"
+                    className="border-[#28563B] text-[#28563B] hover:bg-[#b7cbbd] bg-transparent font-menu-serif font-semibold"
                   >
                     LOGIN
                   </Button>
@@ -319,7 +327,7 @@ export default function Header() {
                       closeMenu();
                       router.push("/signup");
                     }}
-                    className="border-[#28563B] text-[#28563B] hover:bg-[#C9E3D4] bg-transparent font-menu-serif font-semibold"
+                    className="border-[#28563B] text-[#28563B] hover:bg-[#b7cbbd] bg-transparent font-menu-serif font-semibold"
                   >
                     SIGN UP
                   </Button>
@@ -332,20 +340,12 @@ export default function Header() {
                   className={`py-3 px-4 rounded ${
                     isActive("/admin/dashboard")
                       ? "bg-[#28563B] text-white"
-                      : "bg-[#C9E3D4] hover:bg-[#28563B] hover:text-white"
+                      : "bg-[#b7cbbd] hover:bg-[#28563B] hover:text-white"
                   }`}
                 >
                   ADMIN
                 </Link>
               )}
-              <Button
-                variant="ghost"
-                onClick={() => window.open(instagramUrl, "_blank")}
-                className="flex items-center space-x-3 py-3 px-4 rounded bg-[#C9E3D4] text-pink-700 hover:bg-pink-700 hover:text-white font-menu-serif"
-              >
-                <Instagram className="w-6 h-6" />
-                <span>INSTAGRAM</span>
-              </Button>
               {user && (
                 <>
                   <Button
@@ -355,7 +355,7 @@ export default function Header() {
                       closeMenu();
                       router.push("/cart");
                     }}
-                    className="flex items-center space-x-3 py-3 px-4 rounded bg-[#C9E3D4] text-[#28563B] hover:bg-[#28563B] hover:text-white font-menu-serif"
+                    className="flex items-center space-x-3 py-3 px-4 rounded bg-[#b7cbbd] text-[#28563B] hover:bg-[#28563B] hover:text-white font-menu-serif"
                   >
                     <ShoppingCart className="w-7 h-7" />
                     <span>CART</span>
@@ -367,7 +367,7 @@ export default function Header() {
                       closeMenu();
                       router.push("/user-info");
                     }}
-                    className="flex items-center space-x-3 py-3 px-4 rounded bg-[#C9E3D4] text-[#28563B] hover:bg-[#28563B] hover:text-white font-menu-serif"
+                    className="flex items-center space-x-3 py-3 px-4 rounded bg-[#b7cbbd] text-[#28563B] hover:bg-[#28563B] hover:text-white font-menu-serif"
                   >
                     <User className="w-7 h-7" />
                     <span>PROFILE</span>
@@ -378,7 +378,7 @@ export default function Header() {
                       closeMenu();
                       handleLogout();
                     }}
-                    className="flex items-center space-x-3 py-3 px-4 rounded bg-[#C9E3D4] text-[#28563B] hover:bg-[#28563B] hover:text-white font-menu-serif"
+                    className="flex items-center space-x-3 py-3 px-4 rounded bg-[#b7cbbd] text-[#28563B] hover:bg-[#28563B] hover:text-white font-menu-serif"
                   >
                     <LogOut className="w-7 h-7" />
                     <span>LOGOUT</span>
@@ -389,15 +389,6 @@ export default function Header() {
           </div>
         </>
       )}
-
-      {/* Bottom striped border */}
-      <div
-        className="w-full h-4"
-        style={{
-          background:
-            "repeating-linear-gradient(to right, #28563B 0px, #28563B 8px, transparent 8px, transparent 28px)",
-        }}
-      />
     </>
   );
 }

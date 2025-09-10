@@ -9,7 +9,7 @@ import Signup from "./signup/page";
 import Login from "./login/page";
 import ForgotPassword from "./forgot-password/page";
 import Appointments from "./appointments/page";
-import OurServices from "./our-services/page";
+import OurServices from "./services/page";
 import Footer from "../components/footer";
 import Home from "./home/page";
 
