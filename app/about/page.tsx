@@ -101,14 +101,14 @@ export default function HomePage() {
 
   return (
     <div
-      className="relative min-h-screen flex flex-col overflow-hidden"
+      className="relative min-h-screen flex flex-col overflow-hidden w-full"
       style={{
         background: "linear-gradient(135deg, #14532d 0%, #6c935c 40%, #b7e5c2 80%, #d4f1d4 100%)",
       }}
     >
-      <main className="container mx-auto px-4 py-12 flex-1">
-        <div className="max-w-4xl mx-auto rounded-xl shadow-xl overflow-hidden border border-[#6c935c] bg-white/80 backdrop-blur-md">
-          <div className="p-6 sm:p-8 md:p-10 flex flex-col md:flex-row gap-8 items-start">
+      <main className="w-full px-4 py-12 flex-1">
+        <div className="w-full rounded-xl shadow-xl overflow-hidden border border-[#6c935c] bg-white/80 backdrop-blur-md">
+          <div className="p-6 sm:p-8 md:p-10 flex flex-col md:flex-row gap-8 items-start w-full">
             <div className="prose max-w-none flex-1">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-8 text-center bg-gradient-to-r from-[#53885E] via-[#6c935c] to-[#a2d18f] bg-clip-text text-transparent tracking-tight drop-shadow-lg">
                 About Me

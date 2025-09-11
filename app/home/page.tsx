@@ -9,10 +9,12 @@ export default function Home() {
   const { user } = useAuth();
 
   const handleBookNowClick = () => {
-    if (user) {
-      router.push("/appointments");
+    // Scroll to appointments section in combined page
+    const appointmentsSection = document.getElementById("appointments");
+    if (appointmentsSection) {
+      appointmentsSection.scrollIntoView({ behavior: "smooth" });
     } else {
-      router.push("/login");
+      router.push("#appointments");
     }
   };
 
@@ -27,20 +29,22 @@ export default function Home() {
       {/* Centered Content */}
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-center w-full max-w-7xl mx-auto py-16 gap-10 md:gap-20">
         {/* Left: White box with IMAGE ISLAND */}
-        <div className="bg-white rounded-lg shadow-xl px-6 sm:px-8 py-8 sm:py-10 flex flex-col items-start w-full max-w-sm sm:max-w-md md:max-w-lg min-w-0">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-green-900 leading-tight tracking-wide flex flex-wrap items-center">
-            THE&nbsp;
-            <span className="mr-1">IMAGE</span>
-            <span className="inline-flex items-center justify-center">
-              I
-              <img
-                src="/WhatsApp_Image_2025-08-06_at_00.12.04_9d5caab6-removebg-preview.png"
-                alt="Logo S"
-                className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 align-middle mx-0"
-                style={{ verticalAlign: "middle" }}
-              />
-              LAND
-            </span>
+        <div className="bg-white rounded-lg shadow-xl px-6 sm:px-8 py-8 sm:py-10 flex flex-col items-start w-full max-w-2xl min-w-0">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-green-900 leading-tight tracking-wide">
+            <div>THE</div>
+            <div className="flex flex-wrap items-center mt-2">
+              <span className="mr-1">IMAGE</span>
+              <span className="inline-flex items-center justify-center">
+                I
+                <img
+                  src="/WhatsApp_Image_2025-08-06_at_00.12.04_9d5caab6-removebg-preview.png"
+                  alt="Logo SLook"
+                  className="w-14 h-14 md:w-20 md:h-20 align-middle mx-0"
+                  style={{ verticalAlign: "middle" }}
+                />
+                LAND
+              </span>
+            </div>
           </h1>
         </div>
 
