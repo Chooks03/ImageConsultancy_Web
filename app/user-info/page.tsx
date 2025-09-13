@@ -8,7 +8,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button"; // <-- CORRECT IMPORT
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { IndianRupee } from "lucide-react";
 
@@ -33,14 +33,16 @@ export default function UserInfoPage() {
   useEffect(() => {
     if (!user) return;
 
-    const allBookingsRaw = localStorage.getItem("bookings");
-    if (!allBookingsRaw) {
+    const storedBookings = localStorage.getItem("bookings");
+    if (!storedBookings) {
       setPreviousAppointments([]);
       setUpcomingAppointments([]);
       return;
     }
 
-    const allBookings: Booking[] = JSON.parse(allBookingsRaw).map((b: any) => ({
+    const allBookingsRaw = JSON.parse(storedBookings);
+
+    const allBookings: Booking[] = allBookingsRaw.map((b: any) => ({
       bookingId: b.bookingId,
       date: new Date(b.date),
       service: b.service,
@@ -52,17 +54,11 @@ export default function UserInfoPage() {
 
     const now = new Date();
 
-    setPreviousAppointments(
-      allBookings.filter((b) => b.date < now && b.paymentStatus === "Completed")
-    );
-
-    setUpcomingAppointments(
-      allBookings.filter((b) => b.date >= now && b.paymentStatus === "Completed")
-    );
+    setPreviousAppointments(allBookings.filter((b) => b.date < now && b.paymentStatus === "Completed"));
+    setUpcomingAppointments(allBookings.filter((b) => b.date >= now && b.paymentStatus === "Completed"));
   }, [user]);
 
-  // Function to send cancellation emails to client and admin
-  const sendCancellationEmails = async (booking: Booking) => {
+  async function sendCancellationEmails(booking: Booking) {
     try {
       const response = await fetch("/api/send-cancellation-email", {
         method: "POST",
@@ -75,64 +71,55 @@ export default function UserInfoPage() {
           serviceName: booking.service.name,
           date: format(booking.date, "PPP"),
           time: format(booking.date, "p"),
-          adminEmail: "admin@example.com", // Replace with your admin email
+          adminEmail: "admin@example.com", // replace accordingly
         }),
       });
       const json = await response.json();
       if (!json.success) throw new Error(json.error);
       return true;
-    } catch (error) {
-      console.error("Error sending cancellation emails:", error);
+    } catch (err) {
+      console.error("Failed to send cancellation emails:", err);
       return false;
     }
-  };
+  }
 
-  // Handle cancellation: remove booking and notify
-  const handleCancelAppointment = async (bookingId: string) => {
+  async function handleCancelAppointment(bookingId: string) {
     if (!confirm("Are you sure you want to cancel this appointment?")) return;
 
-    const allBookingsRaw = localStorage.getItem("bookings");
-    if (!allBookingsRaw) return;
+    const storedBookings = localStorage.getItem("bookings");
+    if (!storedBookings) return;
 
-    const allBookings: Booking[] = JSON.parse(allBookingsRaw);
+    let bookings = JSON.parse(storedBookings);
 
-    const bookingToCancel = allBookings.find((b) => b.bookingId === bookingId);
-    if (!bookingToCancel) return;
+    const toCancel = bookings.find((b: any) => b.bookingId === bookingId);
+    if (!toCancel) return;
 
-    // Send cancellation emails
-    const emailSent = await sendCancellationEmails(bookingToCancel);
+    const emailSent = await sendCancellationEmails(toCancel);
     if (!emailSent) {
-      alert("Failed to send cancellation emails. Please try again.");
+      alert("Failed to send cancellation emails. Try again later.");
       return;
     }
 
-    // Remove booking from storage
-    const updatedBookings = allBookings.filter((b) => b.bookingId !== bookingId);
-    localStorage.setItem("bookings", JSON.stringify(updatedBookings));
+    bookings = bookings.filter((b: any) => b.bookingId !== bookingId);
+    localStorage.setItem("bookings", JSON.stringify(bookings));
 
-    // Update state
-    setUpcomingAppointments((prev) =>
-      prev.filter((b) => b.bookingId !== bookingId)
-    );
-
+    setUpcomingAppointments((prev) => prev.filter((b) => b.bookingId !== bookingId));
     alert("Appointment cancelled successfully and emails sent.");
-  };
+  }
 
-  if (isLoading) {
+  if (isLoading)
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center font-sans text-green-900 bg-green-50">
         Loading...
       </div>
     );
-  }
 
-  if (!user) {
+  if (!user)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Please log in to see your info.
+      <div className="min-h-screen flex items-center justify-center font-sans text-green-900 bg-green-50">
+        Please log in to view your profile.
       </div>
     );
-  }
 
   const displayName =
     user.username ||
@@ -140,55 +127,47 @@ export default function UserInfoPage() {
     "Unknown User";
 
   return (
-    <div className="min-h-screen bg-green-50 p-6 font-sans max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-green-900">Your Profile</h1>
-      <Card className="mb-8">
+    <div className="min-h-screen max-w-4xl mx-auto p-6 bg-green-50 text-green-900 font-sans">
+      <h1 className="text-4xl font-extrabold mb-8 tracking-wide drop-shadow-md">Your Profile</h1>
+
+      <Card className="mb-10 shadow-lg border border-green-200 rounded-lg bg-white backdrop-blur-sm bg-opacity-40">
         <CardHeader>
           <CardTitle>User Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-green-900">
+        <CardContent className="space-y-3">
           <p>
-            <strong>Username:</strong> {displayName}
+            <span className="font-semibold">Username:</span> {displayName}
           </p>
           <p>
-            <strong>Email:</strong> {user.email ?? "Not Provided"}
+            <span className="font-semibold">Email:</span> {user.email ?? "Not Provided"}
           </p>
           <p>
-            <strong>Contact Number:</strong> {user.phone ?? "Not Provided"}
+            <span className="font-semibold">Contact Number:</span> {user.phone ?? "Not Provided"}
           </p>
         </CardContent>
       </Card>
 
-      <Card className="mb-8">
+      <Card className="mb-10 shadow-lg border border-green-200 rounded-lg bg-white backdrop-blur-sm bg-opacity-40">
         <CardHeader>
           <CardTitle>Upcoming Appointments</CardTitle>
         </CardHeader>
         <CardContent>
           {upcomingAppointments.length === 0 ? (
-            <p className="text-green-700">No upcoming appointments.</p>
+            <p className="text-green-700 italic">No upcoming appointments.</p>
           ) : (
             <ul className="divide-y divide-green-200">
-              {upcomingAppointments.map((a) => (
-                <li
-                  key={a.bookingId}
-                  className="py-3 flex justify-between items-center"
-                >
+              {upcomingAppointments.map((appt) => (
+                <li key={appt.bookingId} className="py-4 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center">
                   <div>
-                    <p className="font-semibold">{a.service.name}</p>
-                    <p className="text-sm text-green-700">
-                      {format(a.date, "PPP p")}
-                    </p>
+                    <p className="text-lg font-semibold">{appt.service.name}</p>
+                    <p className="text-sm text-green-600">{format(appt.date, "PPP")} at {format(appt.date, "p")}</p>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-1 text-green-900 font-semibold">
-                      <IndianRupee className="w-5 h-5" />
-                      <span>{a.service.price.toLocaleString("en-IN")}</span>
+                  <div className="flex items-center mt-3 sm:mt-0 space-x-4">
+                    <div className="flex items-center text-green-800 font-semibold">
+                      <IndianRupee className="mr-1 w-5 h-5" />
+                      {appt.service.price.toLocaleString("en-IN")}
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleCancelAppointment(a.bookingId)}
-                    >
+                    <Button size="sm" variant="destructive" onClick={() => handleCancelAppointment(appt.bookingId)}>
                       Cancel
                     </Button>
                   </div>
@@ -199,29 +178,24 @@ export default function UserInfoPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="shadow-lg border border-green-200 rounded-lg bg-white backdrop-blur-sm bg-opacity-40">
         <CardHeader>
           <CardTitle>Previous Appointments</CardTitle>
         </CardHeader>
         <CardContent>
           {previousAppointments.length === 0 ? (
-            <p className="text-green-700">No previous appointments.</p>
+            <p className="text-green-700 italic">No previous appointments.</p>
           ) : (
             <ul className="divide-y divide-green-200">
-              {previousAppointments.map((a) => (
-                <li
-                  key={a.bookingId}
-                  className="py-3 flex justify-between items-center"
-                >
+              {previousAppointments.map((appt) => (
+                <li key={appt.bookingId} className="py-4 flex justify-between items-center">
                   <div>
-                    <p className="font-semibold">{a.service.name}</p>
-                    <p className="text-sm text-green-700">
-                      {format(a.date, "PPP p")}
-                    </p>
+                    <p className="text-lg font-semibold">{appt.service.name}</p>
+                    <p className="text-sm text-green-600">{format(appt.date, "PPP")} at {format(appt.date, "p")}</p>
                   </div>
-                  <div className="flex items-center space-x-1 text-green-900 font-semibold">
-                    <IndianRupee className="w-5 h-5" />
-                    <span>{a.service.price.toLocaleString("en-IN")}</span>
+                  <div className="flex items-center text-green-800 font-semibold">
+                    <IndianRupee className="mr-1 w-5 h-5" />
+                    {appt.service.price.toLocaleString("en-IN")}
                   </div>
                 </li>
               ))}

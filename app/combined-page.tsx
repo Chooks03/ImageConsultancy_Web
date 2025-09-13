@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import About from "./about/page";
 import Contact from "./contact/page";
 import FAQ from "./faq/page";
@@ -12,7 +13,6 @@ import Appointments from "./appointments/page";
 import OurServices from "./services/page";
 import Footer from "../components/footer";
 import Home from "./home/page";
-import React, { useEffect, useState } from "react";
 
 export default function CombinedPage() {
   const [showArrow, setShowArrow] = useState(false);
@@ -30,48 +30,75 @@ export default function CombinedPage() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-white to-purple-50">
-      
-      {/* Home Page Section (replacing welcome section) */}
-      <section id="home" className="scroll-mt-[80px] max-w-7xl mx-auto my-10 px-4 sm:px-6 md:px-10">
-        <Home />
+    <div className="w-full min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-white to-purple-50 overflow-x-hidden">
+      {/* Each section fills viewport height using min-h-screen */}
+      {/* Flex and centering to use full screen area */}
+
+      <section
+        id="home"
+        className="min-h-screen flex justify-center items-center px-4 sm:px-6 md:px-10"
+      >
+        <div className="max-w-[100vw] w-full">{<Home />}</div>
       </section>
 
-      {/* Other Page Sections */}
-      <section id="about" className="scroll-mt-[80px] max-w-7xl mx-auto my-10 px-4 sm:px-6 md:px-10">
-        <About />
+      <section
+        id="about"
+        className="min-h-screen flex justify-center items-center px-4 sm:px-6 md:px-10"
+      >
+        <div className="max-w-[100vw] w-full">{<About />}</div>
       </section>
 
-      <section id="our-services" className="scroll-mt-[80px] max-w-7xl mx-auto my-10 px-4 sm:px-6 md:px-10">
-        <OurServices />
+      <section
+        id="our-services"
+        className="min-h-screen flex justify-center items-center px-4 sm:px-6 md:px-10"
+      >
+        <div className="max-w-[100vw] w-full">{<OurServices />}</div>
       </section>
 
-      <section id="appointments" className="scroll-mt-[80px] max-w-7xl mx-auto my-10 px-4 sm:px-6 md:px-10">
-        <Appointments />
+      <section
+        id="appointments"
+        className="min-h-screen flex justify-center items-center px-4 sm:px-6 md:px-10"
+      >
+        <div className="max-w-[100vw] w-full">{<Appointments />}</div>
       </section>
 
-      <section id="faq" className="scroll-mt-[80px] max-w-7xl mx-auto my-10 px-4 sm:px-6 md:px-10">
-        <FAQ />
+      <section
+        id="faq"
+        className="min-h-screen flex justify-center items-center px-4 sm:px-6 md:px-10"
+      >
+        <div className="max-w-[100vw] w-full">{<FAQ />}</div>
       </section>
 
-      <section id="instagram" className="scroll-mt-[80px] max-w-7xl mx-auto my-10 px-4 sm:px-6 md:px-10">
-        <Instagram />
+      <section
+        id="instagram"
+        className="min-h-screen flex justify-center items-center px-4 sm:px-6 md:px-10"
+      >
+        <div className="max-w-[100vw] w-full">{<Instagram />}</div>
       </section>
 
-      <section id="contact" className="scroll-mt-[80px] max-w-7xl mx-auto my-10 px-4 sm:px-6 md:px-10">
-        <Contact />
+      <section
+        id="contact"
+        className="min-h-screen flex justify-center items-center px-4 sm:px-6 md:px-10"
+      >
+        <div className="max-w-[100vw] w-full">{<Contact />}</div>
       </section>
 
       <Footer />
 
-      {/* Back to top arrow button, only when header isn't visible */}
+      {/* Back To Top Button */}
       {showArrow && (
         <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className="fixed bottom-8 right-8 z-50 bg-green-900 text-white rounded-full p-3 shadow-lg hover:bg-green-700 transition flex items-center justify-center"
           aria-label="Back to top"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
           </svg>
         </button>

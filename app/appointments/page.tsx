@@ -23,7 +23,7 @@ import {
   addMinutes,
 } from "date-fns";
 import { IndianRupee } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface ColourPackage {
   id: string;
@@ -40,6 +40,8 @@ interface StylePackage {
   price: number;
   description: string;
 }
+
+type BlockedSlot = { date: string; time: string };
 
 const colourPackages: ColourPackage[] = [
   {
@@ -98,14 +100,14 @@ const stylePackages: StylePackage[] = [
     name: "Shape & Style",
     duration: 60,
     price: 4500,
-    description: "Figure analysis, individual style advice. Add-ons available",
+    description: "Figure analysis, individual advice. Add-ons available",
   },
   {
     id: "wardrobe-edit-refresh",
     name: "Wardrobe Edit & Refresh",
     duration: 90,
     price: 8500,
-    description: "Full wardrobe audit, 5–7 styled looks, essentials",
+    description: "Full wardrobe audit, 5-7 styled looks, essentials",
   },
   {
     id: "personal-shopping",
@@ -126,28 +128,28 @@ const stylePackages: StylePackage[] = [
     name: "Monthly Coaching",
     duration: 60,
     price: 7000,
-    description: "2 calls, unlimited WhatsApp support and updates",
+    description: "2 calls, unlimited WhatsApp support",
   },
   {
     id: "bridal-styling",
     name: "Bridal Styling",
     duration: 180,
     price: 20000,
-    description: "Bespoke event styling for weddings & trousseau",
+    description: "Bespoke event styling",
   },
   {
     id: "executive-styling",
     name: "Executive Styling",
     duration: 180,
     price: 25000,
-    description: "Custom styling for professionals & public figures",
+    description: "Custom styling for professionals",
   },
   {
     id: "travel-planning",
     name: "Travel Planning",
     duration: 60,
     price: 4000,
-    description: "Personalized travel wardrobe and capsule planning",
+    description: "Personalized travel wardrobe planning",
   },
 ];
 
@@ -155,11 +157,20 @@ export default function Appointments() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  // Select first package by default if available
+  const defaultPackageId =
+    colourPackages.length > 0
+      ? colourPackages[0].id
+      : stylePackages.length > 0
+      ? stylePackages[0].id
+      : "";
+
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(defaultPackageId);
   const [date, setDate] = useState<Date>();
-  const [selectedDate, setSelectedDate] = useState<Date | null>();
-  const [selectedSlot, setSelectedSlot] = useState<Date | null>();
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const [availableSlots, setAvailableSlots] = useState<Date[]>([]);
 
   const allServices: (ColourPackage | StylePackage)[] = [
@@ -175,11 +186,14 @@ export default function Appointments() {
         .map((b: any) => ({
           ...b,
           date: new Date(b.date),
-          cancelledAt: b.cancelledAt ? new Date(b.cancelledAt) : undefined,
+          cancelledAt: b.cancelled ? new Date(b.cancelledAt) : undefined,
           createdAt: b.createdAt ? new Date(b.createdAt) : undefined,
         }));
       setBookings(parsed);
     }
+
+    const blockedRaw = localStorage.getItem("adminBlockedSlots");
+    setBlockedSlots(blockedRaw ? JSON.parse(blockedRaw) : []);
   }, []);
 
   useEffect(() => {
@@ -194,31 +208,39 @@ export default function Appointments() {
     }
 
     const slots: Date[] = [];
-    const start = 11; // 11 AM
-    const end = 19; // 7 PM
+    const start = 11;
+    const end = 19;
 
     for (let hour = start; hour < end; hour++) {
       for (let min = 0; min < 60; min += svc.duration) {
         const slot = setMinutes(setHours(new Date(selectedDate), hour), min);
-        if (isAfter(slot, new Date())) {
-          slots.push(slot);
-        }
+        if (!isAfter(slot, new Date())) continue;
+
+        const slotDateStr = format(slot, "yyyy-MM-dd");
+        const slotTimeStr = format(slot, "HH:mm");
+
+        // Filter admin blocked slots
+        if (blockedSlots.some(b => b.date === slotDateStr && b.time === slotTimeStr)) continue;
+
+        slots.push(slot);
       }
     }
 
     const filtered = slots.filter(
       (slot) =>
         !bookings.some((booked) => {
-          if (booked.status === "cancelled" || !booked.service) return false;
-          const bookedStart = booked.date,
-            bookedEnd = addMinutes(bookedStart, booked.service.duration);
+          if (booked.cancelled) return false;
+          if (!booked.service) return false;
+          const bookedStart = booked.date;
+          const bookedEnd = addMinutes(bookedStart, booked.service.duration);
           const slotEnd = addMinutes(slot, svc.duration);
           return slot < bookedEnd && slotEnd > bookedStart;
         })
     );
+
     setAvailableSlots(filtered);
     setSelectedSlot(null);
-  }, [selectedDate, selectedServiceId, bookings]);
+  }, [selectedDate, selectedServiceId, bookings, blockedSlots]);
 
   const onDateChange = (date?: Date) => {
     setDate(date);
@@ -374,18 +396,13 @@ export default function Appointments() {
         <section className="flex flex-col lg:flex-row gap-10 px-4">
           <Card className="flex-1">
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold text-green-900">
-                Select Date
-              </CardTitle>
+              <CardTitle>Select Date</CardTitle>
             </CardHeader>
             <CardContent>
               <Calendar
                 mode="single"
                 selected={date ?? undefined}
-                onSelect={(day) => {
-                  setDate(day);
-                  setSelectedDate(day ?? null);
-                }}
+                onSelect={onDateChange}
                 disabled={(day) =>
                   day < addDays(new Date(), 2) || day > addDays(new Date(), 30)
                 }
@@ -395,10 +412,8 @@ export default function Appointments() {
           </Card>
           <Card className="flex-1 flex flex-col">
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold text-green-900">
-                Select Time
-              </CardTitle>
-              <CardDescription className="text-green-700">
+              <CardTitle>Select Time</CardTitle>
+              <CardDescription>
                 {selectedSvc && date
                   ? `Available ${selectedSvc.duration} min slots on ${format(
                       date,
@@ -417,15 +432,15 @@ export default function Appointments() {
                         key={slot.toISOString()}
                         onClick={() => setSelectedSlot(slot)}
                         variant={
-                          slot?.getTime() === selectedSlot?.getTime()
+                          slot.getTime() === selectedSlot?.getTime()
                             ? "default"
                             : "outline"
                         }
-                        className={`rounded-full ${
-                          slot?.getTime() === selectedSlot?.getTime()
+                        className={
+                          slot.getTime() === selectedSlot?.getTime()
                             ? "bg-green-700 text-white"
                             : ""
-                        }`}
+                        }
                       >
                         {format(slot, "p")}
                       </Button>
@@ -446,14 +461,14 @@ export default function Appointments() {
               <Button
                 onClick={handleProceed}
                 disabled={!selectedSlot}
-                className="bg-gradient-to-r from-green-700 to-green-900 text-white rounded-lg py-3 flex-grow hover:brightness-110 transition-transform active:scale-95"
+                className="bg-gradient-to-r from-green-700 to-green-900 text-white rounded-lg py-3 flex-grow mr-4"
               >
                 Book Now
               </Button>
               <Button
                 onClick={handleAddToCart}
                 disabled={!selectedSlot}
-                className="bg-yellow-500 text-white rounded-lg py-3 flex-grow hover:brightness-110 transition-transform active:scale-95"
+                className="bg-yellow-500 text-white rounded-lg py-3 flex-grow"
               >
                 Add to Cart
               </Button>
