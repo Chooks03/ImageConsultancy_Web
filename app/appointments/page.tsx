@@ -23,9 +23,25 @@ import {
   addMinutes,
 } from "date-fns";
 import { IndianRupee } from "lucide-react";
-import { toast } from "@/components/ui/use-toast"; // Ensure correct import path
+import { toast } from "@/components/ui/use-toast";
 
-const colourPackages = [
+interface ColourPackage {
+  id: string;
+  name: string;
+  price: number;
+  details: string[];
+  duration: number;
+}
+
+interface StylePackage {
+  id: string;
+  name: string;
+  duration: number;
+  price: number;
+  description: string;
+}
+
+const colourPackages: ColourPackage[] = [
   {
     id: "classic",
     name: "Classic",
@@ -76,7 +92,7 @@ const colourPackages = [
   },
 ];
 
-const stylePackages = [
+const stylePackages: StylePackage[] = [
   {
     id: "shape-style",
     name: "Shape & Style",
@@ -139,14 +155,17 @@ export default function Appointments() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  const [selectedServiceId, setSelectedServiceId] = useState("");
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const [date, setDate] = useState<Date>();
   const [selectedDate, setSelectedDate] = useState<Date | null>();
   const [selectedSlot, setSelectedSlot] = useState<Date | null>();
   const [bookings, setBookings] = useState<any[]>([]);
   const [availableSlots, setAvailableSlots] = useState<Date[]>([]);
 
-  const allServices = [...colourPackages, ...stylePackages];
+  const allServices: (ColourPackage | StylePackage)[] = [
+    ...colourPackages,
+    ...stylePackages,
+  ];
 
   useEffect(() => {
     const bks = localStorage.getItem("bookings");
@@ -175,8 +194,8 @@ export default function Appointments() {
     }
 
     const slots: Date[] = [];
-    const start = 9;
-    const end = 19;
+    const start = 11; // 11 AM
+    const end = 19; // 7 PM
 
     for (let hour = start; hour < end; hour++) {
       for (let min = 0; min < 60; min += svc.duration) {
@@ -197,7 +216,6 @@ export default function Appointments() {
           return slot < bookedEnd && slotEnd > bookedStart;
         })
     );
-
     setAvailableSlots(filtered);
     setSelectedSlot(null);
   }, [selectedDate, selectedServiceId, bookings]);
@@ -262,6 +280,7 @@ export default function Appointments() {
       title: "Added to Cart",
       description: `${svc.name} at ${format(selectedSlot, "PPP p")} added to cart.`,
     });
+
     router.push("/cart");
   };
 
@@ -276,7 +295,6 @@ export default function Appointments() {
         <h1 className="text-4xl font-extrabold text-center text-green-900 drop-shadow-md">
           Book Your Appointment
         </h1>
-
         <section>
           <h2 className="text-2xl font-semibold mb-6 text-center text-green-800">
             Colour Comparison Packages
@@ -317,7 +335,6 @@ export default function Appointments() {
             ))}
           </RadioGroup>
         </section>
-
         <section>
           <h2 className="text-2xl font-semibold mb-6 text-center text-green-800">
             Style Service Packages
@@ -354,7 +371,6 @@ export default function Appointments() {
             ))}
           </RadioGroup>
         </section>
-
         <section className="flex flex-col lg:flex-row gap-10 px-4">
           <Card className="flex-1">
             <CardHeader>
@@ -365,14 +381,18 @@ export default function Appointments() {
             <CardContent>
               <Calendar
                 mode="single"
-                selected={date}
-                onSelect={onDateChange as (date?: Date) => void}
-                disabled={(date) => date < addDays(new Date(), 2) || date > addDays(new Date(), 30)}
-                className="rounded-md"
+                selected={date ?? undefined}
+                onSelect={(day) => {
+                  setDate(day);
+                  setSelectedDate(day ?? null);
+                }}
+                disabled={(day) =>
+                  day < addDays(new Date(), 2) || day > addDays(new Date(), 30)
+                }
+                className="rounded-md custom-calendar"
               />
             </CardContent>
           </Card>
-
           <Card className="flex-1 flex flex-col">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold text-green-900">
@@ -380,7 +400,10 @@ export default function Appointments() {
               </CardTitle>
               <CardDescription className="text-green-700">
                 {selectedSvc && date
-                  ? `Available ${selectedSvc.duration} min slots on ${format(date, "PPP")}`
+                  ? `Available ${selectedSvc.duration} min slots on ${format(
+                      date,
+                      "PPP"
+                    )}`
                   : "Select service and date"}
               </CardDescription>
             </CardHeader>
@@ -393,18 +416,30 @@ export default function Appointments() {
                         size="lg"
                         key={slot.toISOString()}
                         onClick={() => setSelectedSlot(slot)}
-                        variant={slot?.getTime() === selectedSlot?.getTime() ? "default" : "outline"}
-                        className="rounded-full"
+                        variant={
+                          slot?.getTime() === selectedSlot?.getTime()
+                            ? "default"
+                            : "outline"
+                        }
+                        className={`rounded-full ${
+                          slot?.getTime() === selectedSlot?.getTime()
+                            ? "bg-green-700 text-white"
+                            : ""
+                        }`}
                       >
                         {format(slot, "p")}
                       </Button>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-green-700 italic mt-4">No available slots on this date.</p>
+                  <p className="text-green-700 italic mt-4">
+                    No available slots on this date.
+                  </p>
                 )
               ) : (
-                <p className="text-green-700 italic mt-4">Please select service and date first.</p>
+                <p className="text-green-700 italic mt-4">
+                  Please select service and date first.
+                </p>
               )}
             </CardContent>
             <CardFooter className="flex flex-wrap gap-4">
@@ -438,6 +473,21 @@ export default function Appointments() {
         .scrollbar-thin::-webkit-scrollbar-thumb {
           background-color: #166d00;
           border-radius: 3px;
+        }
+        .custom-calendar .rdp-day_selected,
+        .custom-calendar .rdp-day:focus-visible {
+          background: #166d00 !important;
+          color: #fff !important;
+          border-radius: 50% !important;
+          font-weight: 700 !important;
+          box-shadow: 0 0 2px #3332 !important;
+        }
+        .custom-calendar .rdp-day:hover {
+          background: #fff !important;
+          color: #166d00 !important;
+          border-radius: 50% !important;
+          font-weight: 700 !important;
+          box-shadow: 0 0 2px #3332 !important;
         }
       `}</style>
     </div>
