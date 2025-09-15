@@ -266,7 +266,7 @@ export default function Appointments() {
 
     sessionStorage.setItem("pendingBooking", JSON.stringify(pendingBooking));
     setSelectedSlot(null);
-    router.push("/payment");
+    router.push("/payment"); // Redirects to payment page on Book Now
   };
 
   const handleAddToCart = () => {
@@ -303,11 +303,43 @@ export default function Appointments() {
       description: `${svc.name} at ${format(selectedSlot, "PPP p")} added to cart.`,
     });
 
-    router.push("/cart");
+    router.push("/cart"); // Redirects to cart page on Add to Cart
   };
 
   if (isLoading) return <div>Loading...</div>;
-  if (!user) return <div>Please log in to book appointments.</div>;
+
+  if (!user)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#d7f4cc] font-serif">
+        <div className="w-full max-w-md p-8 rounded-2xl shadow-lg bg-white flex flex-col items-center space-y-7 border-2 border-green-700">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-green-900 drop-shadow text-center">
+            Please log in to book appointments
+          </h2>
+          <p className="text-green-700 text-md md:text-lg text-center">
+            Unlock personalized style and colour consultations.
+            <br />
+            Sign in or create your account to continue.
+          </p>
+          <div className="flex w-full justify-center gap-5 mt-4">
+            <button
+              className="bg-gradient-to-r from-green-700 to-green-900 text-white font-semibold rounded-lg px-6 py-3 shadow transition hover:scale-105 hover:from-green-800 hover:to-green-900"
+              onClick={() => router.push("/login")}
+            >
+              Log In
+            </button>
+            <button
+              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-green-900 font-semibold rounded-lg px-6 py-3 shadow transition hover:scale-105 hover:from-yellow-500 hover:to-yellow-700"
+              onClick={() => router.push("/signup")}
+            >
+              Sign Up
+            </button>
+          </div>
+          <span className="text-sm text-green-700 opacity-80 mt-2">
+            Secure & fast booking for all style services
+          </span>
+        </div>
+      </div>
+    );
 
   const selectedSvc = allServices.find((s) => s.id === selectedServiceId);
 
