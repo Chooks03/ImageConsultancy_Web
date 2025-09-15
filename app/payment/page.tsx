@@ -5,7 +5,7 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";  // Named import here
+import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ArrowLeft, IndianRupee, Shield, Info, Check } from "lucide-react";
@@ -58,20 +58,20 @@ export default function PaymentPage() {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
 
   useEffect(() => {
-    const storedCart = window.sessionStorage.getItem("pendingList");
-    const storedBooking = window.sessionStorage.getItem("pendingBooking");
+    const storedList = window.sessionStorage.getItem("pendingBookingList");
+    const storedSingle = window.sessionStorage.getItem("pendingBooking");
 
-    if (storedCart) {
-      const cart = JSON.parse(storedCart).map((b: any) => ({
+    if (storedList) {
+      const list = JSON.parse(storedList).map((b: any) => ({
         ...b,
         date: new Date(b.date),
       }));
-      setCartBookings(cart);
+      setCartBookings(list);
       setSingleBooking(null);
-    } else if (storedBooking) {
-      const booking = JSON.parse(storedBooking);
-      booking.date = new Date(booking.date);
-      setSingleBooking(booking);
+    } else if (storedSingle) {
+      const single = JSON.parse(storedSingle);
+      single.date = new Date(single.date);
+      setSingleBooking(single);
       setCartBookings(null);
     } else {
       router.push("/");
@@ -85,7 +85,7 @@ export default function PaymentPage() {
 
   const generateBookingId = () => Math.random().toString(36).slice(2).toUpperCase();
 
-  const sendEmailNotifications = async (booking: Booking) => {
+  const sendEmail = async (booking: Booking) => {
     try {
       const response = await fetch("/api/send-appointment-email", {
         method: "POST",
@@ -108,8 +108,7 @@ export default function PaymentPage() {
         }),
       });
       const json = await response.json();
-      if (!json.success) throw new Error(json.error);
-      return true;
+      return json.success;
     } catch {
       return false;
     }
@@ -117,115 +116,112 @@ export default function PaymentPage() {
 
   const currentBooking = cartBookings ? cartBookings[currentIndex] : singleBooking;
 
-  const handlePayment = async () => {
+  const handlePayment = () => {
     if (!currentBooking || !user || paymentCompleted) return;
 
     setIsProcessing(true);
-    try {
-      const options = {
-        key: "rzp_test_4IuEnRO8iWHifH", // Your Razorpay test key
-        amount: currentBooking.service.price * 100,
-        currency: "INR",
-        name: "Sriharshini",
-        description: "Image Consultancy Service",
-        handler: async (response: any) => {
+
+    const options = {
+      key: "rzp_test_4IuEnRO8iWHifH", // Your provided Razorpay key here
+      amount: currentBooking.service.price * 100,
+      currency: "INR",
+      name: "Sriharshini",
+      description: "Image Consultancy Service",
+      handler: async (response: any) => {
+        toast({
+          title: "Payment Successful",
+          description: "Payment ID: " + response.razorpay_payment_id,
+        });
+
+        const booking: Booking = {
+          ...currentBooking,
+          id: Date.now().toString(),
+          bookingId: generateBookingId(),
+          paymentMethod: "Card",
+          paymentStatus: "Completed",
+          createdAt: new Date(),
+          userName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+          userEmail: user.email,
+          userPhone: user.phone,
+        };
+
+        const existing = JSON.parse(window.localStorage.getItem("bookings") || "[]");
+        existing.push(booking);
+        window.localStorage.setItem("bookings", JSON.stringify(existing));
+
+        const emailSent = await sendEmail(booking);
+
+        if (emailSent) {
+          setCompletedBooking(booking);
+          setShowSuccessDialog(true);
+          setPaymentCompleted(true);
+        } else {
           toast({
-            title: "Payment Successful",
-            description: "Payment ID: " + response.razorpay_payment_id,
-            variant: "default",
+            title: "Email Failed",
+            description: "Failed to send confirmation email.",
+            variant: "destructive",
           });
+        }
 
-          const booking: Booking = {
-            ...currentBooking,
-            id: Date.now().toString(),
-            bookingId: generateBookingId(),
-            paymentMethod: "Card",
-            paymentStatus: "Completed",
-            createdAt: new Date(),
-            userName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
-            userEmail: user.email,
-            userPhone: user.phone,
-          };
-
-          const existingBookings = JSON.parse(window.localStorage.getItem("bookings") || "[]");
-          existingBookings.push(booking);
-          window.localStorage.setItem("bookings", JSON.stringify(existingBookings));
-
-          const emailSent = await sendEmailNotifications(booking);
-
-          if (emailSent) {
-            setCompletedBooking(booking);
-            setShowSuccessDialog(true);
-            setPaymentCompleted(true);
+        if (cartBookings) {
+          const next = currentIndex + 1;
+          if (next < cartBookings.length) {
+            setCurrentIndex(next);
+            setPaymentCompleted(false);
           } else {
-            toast({
-              title: "Email Failed",
-              description: "Could not send confirmation email. Please contact support.",
-              variant: "destructive",
-            });
-          }
-
-          if (cartBookings) {
-            const nextIndex = currentIndex + 1;
-            if (nextIndex < cartBookings.length) {
-              setCurrentIndex(nextIndex);
-              setPaymentCompleted(false);
-            } else {
-              setShowSuccessDialog(false);
-              window.sessionStorage.removeItem("pendingList");
-              router.push("/");
-            }
-          } else {
-            window.sessionStorage.removeItem("pendingBooking");
+            setShowSuccessDialog(false);
+            window.sessionStorage.removeItem("pendingBookingList");
             router.push("/");
           }
-        },
-        modal: {
-          ondismiss: () => {
-            toast({
-              title: "Payment Cancelled",
-              description: "Payment cancelled by user.",
-              variant: "destructive",
-            });
-          },
-        },
-        prefill: {
-          name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
-          email: user.email,
-          contact: user.phone,
-        },
-        theme: {
-          color: "#22c55e",
-        },
-      };
+        } else {
+          window.sessionStorage.removeItem("pendingBooking");
+          router.push("/");
+        }
+      },
 
-      if (typeof window !== "undefined" && window.Razorpay) {
-        // @ts-ignore
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      } else {
-        toast({
-          title: "SDK Not Loaded",
-          description: "Razorpay SDK not loaded. Please refresh and try again.",
-          variant: "destructive",
-        });
-      }
-    } catch {
+      modal: {
+        ondismiss: () => {
+          toast({
+            title: "Payment Cancelled",
+            description: "Payment cancelled by user.",
+          });
+        },
+      },
+
+      prefill: {
+        name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
+        email: user.email,
+        contact: user.phone,
+      },
+
+      theme: { color: "#22c55e" },
+    };
+
+    if (typeof window !== "undefined" && window.Razorpay) {
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } else {
       toast({
-        title: "Payment Failed",
-        description: "Error processing payment.",
+        title: "SDK Not Loaded",
+        description: "Razorpay SDK not loaded. Refresh and try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsProcessing(false);
     }
+
+    setIsProcessing(false);
   };
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
-  if (!user) return <div className="min-h-screen flex items-center justify-center">Please login to continue.</div>;
+  if (!user) {
+    return <div className="min-h-screen flex items-center justify-center">Please login to continue.</div>;
+  }
 
-  if (!currentBooking) return <div className="min-h-screen flex items-center justify-center">No booking found.</div>;
+  if (!currentBooking) {
+    return <div className="min-h-screen flex items-center justify-center">No booking found.</div>;
+  }
 
   const { service, date } = currentBooking;
 
@@ -233,13 +229,9 @@ export default function PaymentPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-6">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       <div className="container max-w-xl mx-auto">
-        <div className="flex items-center mb-6">
-          <Button variant="ghost" onClick={() => router.back()} className="mr-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <h1 className="text-2xl font-bold text-green-700">Complete Payment</h1>
-        </div>
+        <button className="mb-4 flex items-center text-green-700" onClick={() => router.back()}>
+          <ArrowLeft className="mr-2" /> Back
+        </button>
         <Card>
           <CardHeader>
             <CardTitle>Booking Summary</CardTitle>
@@ -256,11 +248,11 @@ export default function PaymentPage() {
               </div>
               <div className="flex justify-between">
                 <span>Date:</span>
-                <span>{date ? format(date, "PPP") : ""}</span>
+                <span>{format(date, "PPP")}</span>
               </div>
               <div className="flex justify-between">
                 <span>Time:</span>
-                <span>{date ? format(date, "p") : ""}</span>
+                <span>{format(date, "p")}</span>
               </div>
               <div className="flex justify-between">
                 <span>Consultant:</span>
@@ -292,7 +284,7 @@ export default function PaymentPage() {
             </div>
             {!paymentCompleted && (
               <Button onClick={handlePayment} disabled={isProcessing} className="mt-6 w-full">
-                {isProcessing ? "Processing..." : `Pay ₹${service.price}`}
+                Pay ₹{service.price}
               </Button>
             )}
           </CardContent>
@@ -300,32 +292,28 @@ export default function PaymentPage() {
         <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="flex flex-col items-center space-y-2 text-green-600">
-                <Check className="w-10 h-10" />
+              <DialogTitle className="flex flex-col items-center text-green-600">
+                <Check className="mb-2" size={48} />
                 Payment Successful
               </DialogTitle>
             </DialogHeader>
             <DialogDescription className="text-center">
-              <p className="mb-2 font-semibold">Booking ID: {completedBooking?.bookingId}</p>
+              <p><strong>Booking ID:</strong> {completedBooking?.bookingId}</p>
               <p>Your {completedBooking?.service.name} appointment is confirmed</p>
-              <p className="mb-4">{completedBooking ? format(completedBooking.date, "PPP p") : ""}</p>
+              <p>{completedBooking ? format(completedBooking.date, "PPP p") : ""}</p>
               <p>Check your email for details</p>
             </DialogDescription>
             <div className="px-4 pb-4">
-              <Button
-                onClick={() => {
-                  setShowSuccessDialog(false);
-                  router.push("/");
-                }}
-                className="w-full"
-              >
+              <Button className="w-full" onClick={() => {
+                setShowSuccessDialog(false);
+                router.push("/");
+              }}>
                 Continue
               </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
     </div>
   );
 }

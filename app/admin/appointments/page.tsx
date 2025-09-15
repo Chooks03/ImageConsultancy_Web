@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { format, startOfDay, endOfDay, addDays } from "date-fns";
+import { format, addDays, startOfDay, endOfDay } from "date-fns";
 import { useAuth } from "@/components/auth-provider";
 import Footer from "@/components/footer";
 import {
@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"; // <-- fixed import
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -41,25 +41,11 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
-import {
   Download,
   Search,
   IndianRupee,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: "admin" | "user";
-  isActive: boolean;
-}
 
 interface Booking {
   id: string;
@@ -90,24 +76,15 @@ export default function AdminDashboard(): React.ReactElement {
   const router = useRouter();
   const { user: currentUser } = useAuth();
 
-  // User Management
-  const [users, setUsers] = useState<User[]>([]);
-
-  // Appointment Management
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [cancelledBookings, setCancelledBookings] = useState<Booking[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [filterDate, setFilterDate] = useState<string>("all");
-  const [isCancelling, setIsCancelling] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterDate, setFilterDate] = useState("all");
+  const [isCancelling, setIsCancelling] = useState(false);
   const [cancellingBooking, setCancellingBooking] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load users
-    const rawUsers = localStorage.getItem("users");
-    if (rawUsers) setUsers(JSON.parse(rawUsers));
-
-    // Load bookings and cancelled bookings
     const parseBookings = (dataStr: string) => {
       try {
         const parsed = JSON.parse(dataStr);
@@ -121,33 +98,31 @@ export default function AdminDashboard(): React.ReactElement {
         return [];
       }
     };
+
     const bookingsStr = localStorage.getItem("bookings");
-    if (bookingsStr) setBookings(parseBookings(bookingsStr));
     const cancelledStr = localStorage.getItem("cancelledBookings");
+    if (bookingsStr) setBookings(parseBookings(bookingsStr));
     if (cancelledStr) setCancelledBookings(parseBookings(cancelledStr));
   }, []);
 
-  const handleCancel = async (booking: Booking): Promise<void> => {
+  const handleCancel = async (booking: Booking) => {
     setIsCancelling(true);
     setCancellingBooking(booking.id);
-
     try {
-      await new Promise(res => setTimeout(res, 1500));
-
-      const updatedBookings = bookings.filter(b => b.id !== booking.id);
-      const cancelledEntry: Booking = {
+      await new Promise((res) => setTimeout(res, 1500));
+      const updatedBookings = bookings.filter((b) => b.id !== booking.id);
+      const cancelledEntry = {
         ...booking,
+        cancelled: true,
         cancelledAt: new Date(),
-        status: "cancelled",
         cancelledBy: "admin",
+        status: "cancelled",
       };
       const updatedCancelled = [...cancelledBookings, cancelledEntry];
-
       localStorage.setItem("bookings", JSON.stringify(updatedBookings));
       localStorage.setItem("cancelledBookings", JSON.stringify(updatedCancelled));
       setBookings(updatedBookings);
       setCancelledBookings(updatedCancelled);
-
       toast({
         title: "Appointment Cancelled",
         description: `Cancelled appointment for ${booking.username}.`,
@@ -164,37 +139,27 @@ export default function AdminDashboard(): React.ReactElement {
     }
   };
 
-  const filterBookings = (arr: Booking[]): Booking[] => {
-    const lowerQuery = searchQuery.toLowerCase();
+  const filterBookings = (arr: Booking[]) => {
+    const lower = searchQuery.toLowerCase();
     return arr.filter((booking) => {
       const matchesSearch =
         !searchQuery ||
         [booking.bookingId, booking.username, booking.userEmail, booking.serviceName]
           .filter(Boolean)
-          .some(f => f.toLowerCase().includes(lowerQuery));
-
+          .some((field) => field.toLowerCase().includes(lower));
       let matchesStatus = true;
-      if (filterStatus === "paid")
-        matchesStatus = booking.paymentStatus === "completed";
-      else if (filterStatus === "pending")
-        matchesStatus = booking.paymentStatus !== "completed";
-
+      if (filterStatus === "paid") matchesStatus = booking.paymentStatus === "completed";
+      else if (filterStatus === "pending") matchesStatus = booking.paymentStatus !== "completed";
       let matchesDate = true;
       const now = new Date();
-      const startToday = startOfDay(now);
-      const endToday = endOfDay(now);
-      const tomorrow = endOfDay(addDays(startToday, 1));
+      const startOfDay_ = startOfDay(now);
+      const endOfDay_ = endOfDay(now);
+      const tomorrow = endOfDay(startOfDay_).getTime() + 24 * 60 * 60 * 1000;
       const bookDate = booking.date;
-
-      if (filterDate === "today")
-        matchesDate = bookDate >= startToday && bookDate <= endToday;
-      else if (filterDate === "tomorrow")
-        matchesDate = bookDate > endToday && bookDate <= tomorrow;
-      else if (filterDate === "upcoming")
-        matchesDate = bookDate > now;
-      else if (filterDate === "past")
-        matchesDate = bookDate < now;
-
+      if (filterDate === "today") matchesDate = bookDate >= startOfDay_ && bookDate <= endOfDay_;
+      else if (filterDate === "tomorrow") matchesDate = bookDate > endOfDay_ && bookDate <= new Date(tomorrow);
+      else if (filterDate === "upcoming") matchesDate = bookDate > now;
+      else if (filterDate === "past") matchesDate = bookDate < now;
       return matchesSearch && matchesStatus && matchesDate;
     });
   };
@@ -202,13 +167,23 @@ export default function AdminDashboard(): React.ReactElement {
   const filteredActiveBookings = filterBookings(bookings);
   const filteredCancelledBookings = filterBookings(cancelledBookings);
 
-  // CSV download (Appointments)
   const downloadCsv = () => {
     const headers = [
-      "Booking ID", "Date", "Time", "Username", "Email", "Phone", "Service",
-      "Duration", "Amount", "Payment Method", "Payment Status", "Cancelled On", "Cancelled By"
+      "Booking ID",
+      "Date",
+      "Time",
+      "Username",
+      "Email",
+      "Phone",
+      "Service",
+      "Duration",
+      "Amount",
+      "Payment Method",
+      "Payment Status",
+      "Cancelled On",
+      "Cancelled By",
     ];
-    const rows = [...bookings, ...cancelledBookings].map(b => [
+    const rows = [...bookings, ...cancelledBookings].map((b) => [
       b.bookingId ?? "",
       b.date ? format(b.date, "yyyy-MM-dd") : "",
       b.date ? format(b.date, "HH:mm") : "",
@@ -216,15 +191,16 @@ export default function AdminDashboard(): React.ReactElement {
       b.userEmail ?? "",
       b.userPhone ?? "",
       b.serviceName ?? "",
-      b.duration ? `${b.duration} mins` : "",
+      b.duration ?? "",
       b.amount ?? "",
       b.paymentMethod ?? "",
       b.paymentStatus ?? "",
       b.cancelledAt ? format(b.cancelledAt, "yyyy-MM-dd HH:mm") : "",
-      b.cancelledBy === "admin" ? "Admin" : b.cancelledBy ?? b.username ?? "",
+      b.cancelledBy ?? "",
     ]);
     const csvContent = [headers, ...rows]
-      .map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(",")).join("\n");
+      .map((row) => row.map((field) => `"${String(field).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -236,230 +212,207 @@ export default function AdminDashboard(): React.ReactElement {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <header className="max-w-7xl mx-auto mb-8 flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <header className="flex items-center justify-between max-w-7xl mx-auto mb-8">
+        <h1 className="text-3xl font-bold">Appointment Management</h1>
         <Button onClick={() => router.push("/")}>Back to Site</Button>
       </header>
-      <main className="max-w-7xl mx-auto bg-white p-6 rounded shadow">
-        <Tabs defaultValue="users">
-          <TabsList className="mb-6">
-            <TabsTrigger value="users">User Management</TabsTrigger>
-            <TabsTrigger value="appointments">Appointment Management</TabsTrigger>
-          </TabsList>
 
-          {/* USER MANAGEMENT */}
-          <TabsContent value="users">
-            <h2 className="text-xl font-semibold mb-4">User Management</h2>
+      <main className="max-w-7xl mx-auto bg-white rounded shadow p-6 overflow-auto">
+        <div className="mb-4 flex flex-wrap gap-4 items-center">
+          <div className="relative flex-grow max-w-xs">
+            <Input
+              placeholder="Search appointments"
+              value={searchQuery}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+            <Search className="absolute left-2 top-2.5 w-5 h-5 text-gray-400" />
+          </div>
+
+          <Select
+            value={filterStatus}
+            onValueChange={setFilterStatus}
+          >
+            <SelectTrigger>Status</SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="paid">Paid</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filterDate}
+            onValueChange={setFilterDate}
+          >
+            <SelectTrigger>Date</SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="tomorrow">Tomorrow</SelectItem>
+              <SelectItem value="upcoming">Upcoming</SelectItem>
+              <SelectItem value="past">Past</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button onClick={downloadCsv}>
+            <Download className="mr-1" /> Export CSV
+          </Button>
+        </div>
+
+        <Card className="mb-10">
+          <CardHeader>
+            <CardTitle>Active Appointments</CardTitle>
+            <CardDescription>Manage upcoming appointments</CardDescription>
+          </CardHeader>
+
+          <CardContent className="overflow-auto max-h-[400px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User ID</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>Booking ID</TableHead>
+                  <TableHead>Date &amp; Time</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
-                {users.map(user => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.id}</TableCell>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>{user.isActive ? "Active" : "Inactive"}</TableCell>
-                  </TableRow>
-                ))}
-                {users.length === 0 && (
+                {filteredActiveBookings.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center p-6 text-gray-500">
-                      No users found.
+                    <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                      No appointments found.
                     </TableCell>
                   </TableRow>
+                ) : (
+                  filteredActiveBookings
+                    .sort((a, b) => a.date.getTime() - b.date.getTime())
+                    .map((booking) => (
+                      <TableRow key={booking.id}>
+                        <TableCell>{booking.bookingId}</TableCell>
+                        <TableCell>
+                          {format(booking.date, "MMM d, yyyy")}
+                          <br />
+                          <small>{format(booking.date, "h:mm a")}</small>
+                        </TableCell>
+                        <TableCell>
+                          {booking.username}
+                          <br />
+                          <small>{booking.userEmail}</small>
+                        </TableCell>
+                        <TableCell>
+                          {booking.serviceName}
+                          <br />
+                          <small>{booking.duration || ""}</small>
+                        </TableCell>
+                        <TableCell>
+                          <IndianRupee className="inline w-5 h-5 mr-1" />
+                          {booking.amount}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              booking.paymentStatus === "completed"
+                                ? "default"
+                                : "destructive"
+                            }
+                          >
+                            {booking.paymentStatus === "completed"
+                              ? "Paid"
+                              : "Pending"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <CancelDialog
+                            booking={booking}
+                            onCancel={handleCancel}
+                            isCancelling={
+                              isCancelling && cancellingBooking === booking.id
+                            }
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
                 )}
               </TableBody>
             </Table>
-          </TabsContent>
+          </CardContent>
+        </Card>
 
-          {/* APPOINTMENTS */}
-          <TabsContent value="appointments">
-            <h2 className="text-xl font-semibold mb-4">Appointment Management</h2>
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 text-gray-400" />
-                  <Input
-                    value={searchQuery}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                    placeholder="Search appointments"
-                    className="pl-10"
-                  />
-                </div>
-                <Select
-                  value={filterStatus}
-                  onValueChange={setFilterStatus as (value: string) => void}
-                >
-                  <SelectTrigger>Status</SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={filterDate}
-                  onValueChange={setFilterDate as (value: string) => void}
-                >
-                  <SelectTrigger>Date</SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                    <SelectItem value="upcoming">Upcoming</SelectItem>
-                    <SelectItem value="past">Past</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={downloadCsv}>
-                  <Download className="mr-2" />
-                  Download CSV
-                </Button>
-              </div>
-              <Table>
-                <TableHeader>
+        <Card>
+          <CardHeader>
+            <CardTitle>Cancelled Appointments</CardTitle>
+            <CardDescription>Review cancelled appointments</CardDescription>
+          </CardHeader>
+
+          <CardContent className="overflow-auto max-h-[400px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Booking ID</TableHead>
+                  <TableHead>Date &amp; Time</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Cancelled On</TableHead>
+                  <TableHead>Cancelled By</TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {filteredCancelledBookings.length === 0 ? (
                   <TableRow>
-                    <TableHead>Booking ID</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                      No cancelled appointments.
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredActiveBookings.length ? (
-                    filteredActiveBookings
-                      .sort((a, b) => a.date.getTime() - b.date.getTime())
-                      .map((booking: Booking) => (
-                        <TableRow key={booking.id}>
-                          <TableCell>{booking.bookingId || "-"}</TableCell>
-                          <TableCell>
-                            {format(booking.date, "MMM d, yyyy")}
-                            <br />
-                            <small>{format(booking.date, "h:mm a")}</small>
-                          </TableCell>
-                          <TableCell>
-                            <div>{booking.username || "Unknown User"}</div>
-                            <small>{booking.userEmail || ""}</small>
-                          </TableCell>
-                          <TableCell>
-                            <div>{booking.serviceName || "No Service"}</div>
-                            <small>{booking.duration ? `${booking.duration} mins` : ""}</small>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <IndianRupee className="inline mr-1 w-4 h-4" />
-                              {booking.amount || "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={
-                                booking.paymentStatus === "completed"
-                                  ? "text-green-700 border-green-500 bg-green-50"
-                                  : "text-yellow-700 border-yellow-500 bg-yellow-50"
-                              }
-                            >
-                              {booking.paymentStatus === "completed" ? "Paid" : "Pending"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <CancelDialog
-                              booking={booking}
-                              onCancel={handleCancel}
-                              isCancelling={isCancelling && cancellingBooking === booking.id}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center p-6 text-gray-500">
-                        {searchQuery || filterStatus !== "all" || filterDate !== "all"
-                          ? "No matching appointments found"
-                          : "No active appointments"}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              {/* Cancelled Appointments */}
-              <h3 className="text-lg mt-8 mb-4 font-semibold">Cancelled Appointments</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Booking ID</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Cancelled On</TableHead>
-                    <TableHead>Cancelled By</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCancelledBookings.length ? (
-                    filteredCancelledBookings
-                      .sort((a, b) => (b.cancelledAt?.getTime() || 0) - (a.cancelledAt?.getTime() || 0))
-                      .map((booking: Booking) => (
-                        <TableRow key={booking.id}>
-                          <TableCell>{booking.bookingId || "-"}</TableCell>
-                          <TableCell>
-                            {format(booking.date, "MMM d, yyyy")}
-                            <br />
-                            <small>{format(booking.date, "h:mm a")}</small>
-                          </TableCell>
-                          <TableCell>
-                            <div>{booking.username || "Unknown User"}</div>
-                            <small>{booking.userEmail || ""}</small>
-                          </TableCell>
-                          <TableCell>
-                            <div>{booking.serviceName || "No Service"}</div>
-                            <small>{booking.duration ? `${booking.duration} mins` : ""}</small>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <IndianRupee className="inline mr-1 w-4 h-4" />
-                              {booking.amount || "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {booking.cancelledAt ? format(booking.cancelledAt, "MMM d, yyyy") : "-"}
-                            <br />
-                            <small>{booking.cancelledAt ? format(booking.cancelledAt, "h:mm a") : ""}</small>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="capitalize">
-                              {booking.cancelledBy === "admin" ? "Admin" : booking.cancelledBy || booking.username || "Unknown"}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center p-6 text-gray-500">
-                        {searchQuery || filterStatus !== "all" || filterDate !== "all"
-                          ? "No matching cancelled appointments"
-                          : "No cancelled appointments"}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-        </Tabs>
+                ) : (
+                  filteredCancelledBookings
+                    .sort(
+                      (a, b) =>
+                        (b.cancelledAt?.getTime() || 0) -
+                        (a.cancelledAt?.getTime() || 0)
+                    )
+                    .map((booking) => (
+                      <TableRow key={booking.id}>
+                        <TableCell>{booking.bookingId}</TableCell>
+                        <TableCell>
+                          {format(booking.date, "MMM d, yyyy")}
+                          <br />
+                          <small>{format(booking.date, "h:mm a")}</small>
+                        </TableCell>
+                        <TableCell>
+                          {booking.username}
+                          <br />
+                          <small>{booking.userEmail}</small>
+                        </TableCell>
+                        <TableCell>
+                          {booking.serviceName}
+                          <br />
+                          <small>{booking.duration || ""}</small>
+                        </TableCell>
+                        <TableCell>
+                          <IndianRupee className="inline w-5 h-5 mr-1" />
+                          {booking.amount}
+                        </TableCell>
+                        <TableCell>
+                          {booking.cancelledAt
+                            ? format(booking.cancelledAt, "MMM d, yyyy h:mm a")
+                            : "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{booking.cancelledBy || "Unknown"}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </main>
       <Footer />
     </div>
@@ -470,11 +423,11 @@ function CancelDialog({
   booking,
   onCancel,
   isCancelling,
-}: CancelDialogProps): React.ReactElement {
+}: CancelDialogProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="outline" disabled={isCancelling}>
+        <Button size="sm" disabled={isCancelling}>
           {isCancelling ? "Cancelling..." : "Cancel"}
         </Button>
       </AlertDialogTrigger>
@@ -482,18 +435,12 @@ function CancelDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Cancel Appointment</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to cancel the appointment for{" "}
-            <strong>{booking.username || "Unknown User"}</strong> on{" "}
-            {booking.date ? format(booking.date, "MMMM d, yyyy 'at' h:mm a") : "Unknown date"}
-            ?
+            Are you sure you want to cancel the appointment for <strong>{booking.username}</strong> on {format(booking.date, "PPPP p")}?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Keep Appointment</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-red-600 text-white"
-            onClick={() => onCancel(booking)}
-          >
+          <AlertDialogAction className="bg-red-600" onClick={() => onCancel(booking)}>
             Confirm Cancel
           </AlertDialogAction>
         </AlertDialogFooter>

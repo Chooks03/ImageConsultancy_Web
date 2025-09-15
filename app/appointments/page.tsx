@@ -293,10 +293,11 @@ export default function Appointments() {
       createdAt: new Date(),
     };
 
-    const existingCart = sessionStorage.getItem("cart");
+    // IMPORTANT: Store cart under "cartItems" key for the cart page to read correctly
+    const existingCart = sessionStorage.getItem("cartItems");
     const cart = existingCart ? JSON.parse(existingCart) : [];
     cart.push(booking);
-    sessionStorage.setItem("cart", JSON.stringify(cart));
+    sessionStorage.setItem("cartItems", JSON.stringify(cart));
 
     toast({
       title: "Added to Cart",
@@ -479,14 +480,10 @@ export default function Appointments() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-green-700 italic mt-4">
-                    No available slots on this date.
-                  </p>
+                  <p className="text-green-700 italic mt-4">No available slots on this date.</p>
                 )
               ) : (
-                <p className="text-green-700 italic mt-4">
-                  Please select service and date first.
-                </p>
+                <p className="text-green-700 italic mt-4">Please select service and date first.</p>
               )}
             </CardContent>
             <CardFooter className="flex flex-wrap gap-4">
